@@ -12,6 +12,12 @@ trait TicketInfoService extends WebServiceCalls {
 //  recover with None
   def withNone[T]:Recovery[Option[T]] = { case NonFatal(e) ⇒ None }
 
+//  recovery with empty sequence
+  def withEmptySeq[T]:Recovery[Seq[T]] = { case NonFatal(e) ⇒ Seq() }
+
+//  recover with the previous info that was built in the previous step
+  def withPrevious(previousTicketInfo: TicketInfo): Recovery[TicketInfo] = { case NonFatal(e) ⇒ previousTicketInfo }
+
   def getWeather(ticketInfo: TicketInfo): Future[TicketInfo] = {
     val futureWeatherX = callWeatherXService(ticketInfo).recover(withNone)
 
