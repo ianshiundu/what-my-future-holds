@@ -1,5 +1,7 @@
 package com.showtix
 
+import org.joda.time.DateTime
+
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 trait TicketInfoService extends WebServiceCalls {
@@ -9,6 +11,7 @@ trait TicketInfoService extends WebServiceCalls {
 
 //  recover with None
   def withNone[T]:Recovery[Option[T]] = { case NonFatal(e) ⇒ None }
+
   def getWeather(ticketInfo: TicketInfo): Future[TicketInfo] = {
     val futureWeatherX = callWeatherXService(ticketInfo).recover(withNone)
 
@@ -21,9 +24,19 @@ trait TicketInfoService extends WebServiceCalls {
     }
   }
 
+  def getTraffic(ticketInfo: TicketInfo): Future[TicketInfo] = {
+    ticketInfo.event.map { event ⇒
+      callTrafficService(ticketInfo.userLocation, event.location, event.time).map {routeResponse ⇒
+        ticketInfo.copy(travelAdvice = Some(TravelAdvice(routeByCar = routeResponse)))
+      }
+    }.getOrElse(Future.successful(ticketInfo))
+  }
 }
 
 trait WebServiceCalls {
   def callWeatherXService(ticketInfo: TicketInfo): Future[Option[Weather]]
   def callWeatherYService(ticketInfo: TicketInfo): Future[Option[Weather]]
+  def callTrafficService(origin: Location, destination: Location, time: DateTime): Future[Option[RouteByCar]]
+  def callPublicTransportService(origin: Location, destination: Location, time: DateTime): Future[Option[PublicTransportAdvice]]
+
 }
