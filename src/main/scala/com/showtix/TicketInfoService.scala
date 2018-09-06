@@ -66,6 +66,18 @@ trait TicketInfoService extends WebServiceCalls {
     info.copy(travelAdvice = Some(travelAdvice))
     }
   }
+
+  def getTravelAdviceUsingForComprehension(ticketInfo: TicketInfo, event: Event): Future[TicketInfo] = {
+    val futureRoute = callTrafficService(ticketInfo.userLocation, event.location, event.time).recover(withNone)
+
+    val futurePublicTransport = callPublicTransportService(ticketInfo.userLocation, event.location, event.time).recover(withNone)
+
+    for {
+      (routeByCar, publicTransportAdvcie) ← futureRoute.zip(futurePublicTransport)
+      travelAdvice = TravelAdvice(routeByCar, publicTransportAdvcie)
+    } yield ticketInfo.copy(travelAdvice = Some(travelAdvice))
+  }
+
 }
 
 trait WebServiceCalls {
