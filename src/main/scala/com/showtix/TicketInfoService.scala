@@ -82,8 +82,13 @@ trait TicketInfoService extends WebServiceCalls {
 
 trait WebServiceCalls {
   def callWeatherXService(ticketInfo: TicketInfo): Future[Option[Weather]]
+
   def callWeatherYService(ticketInfo: TicketInfo): Future[Option[Weather]]
+
   def callTrafficService(origin: Location, destination: Location, time: DateTime): Future[Option[RouteByCar]]
+
   def callPublicTransportService(origin: Location, destination: Location, time: DateTime): Future[Option[PublicTransportAdvice]]
+
+  def callArtistCalendarService(artist: Artist, nearLocation: Location): Future[Event]
 
 }
