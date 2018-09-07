@@ -78,6 +78,13 @@ trait TicketInfoService extends WebServiceCalls {
     } yield ticketInfo.copy(travelAdvice = Some(travelAdvice))
   }
 
+  def getPlannedEvents(event: Event, artists: Seq[Artist]): Future[Seq[Event]]= {
+    val events = artists.map { artist ⇒
+      callArtistCalendarService(artist, event.location)
+    }
+    Future.sequence(events)
+  }
+
 }
 
 trait WebServiceCalls {
