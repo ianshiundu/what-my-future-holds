@@ -91,6 +91,15 @@ trait TicketInfoService extends WebServiceCalls {
     }
   }
 
+  def getSuggestions(event: Event): Future[Seq[Event]] = {
+    val futureArtists = callSimilarArtistService(event)
+
+    for {
+      artists ← futureArtists
+      events ← getPlannedEvents(event, artists)
+    } yield  events
+  }
+
 }
 
 trait WebServiceCalls {
@@ -103,5 +112,7 @@ trait WebServiceCalls {
   def callPublicTransportService(origin: Location, destination: Location, time: DateTime): Future[Option[PublicTransportAdvice]]
 
   def callArtistCalendarService(artist: Artist, nearLocation: Location): Future[Event]
+
+  def callSimilarArtistService(event: Event): Future[Seq[Artist]]
 
 }
