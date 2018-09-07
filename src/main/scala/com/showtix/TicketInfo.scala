@@ -4,8 +4,8 @@ import org.joda.time.{DateTime, Duration}
 
 case class TicketInfo(ticketNumber: String,
                       userLocation: Location,
-                      event: Option[Event],
-                      travelAdvice: Option[TravelAdvice],
+                      event: Option[Event] = None,
+                      travelAdvice: Option[TravelAdvice] = None,
                       weather: Option[Weather] = None,
                       suggestions: Seq[Event] = Seq())
 
