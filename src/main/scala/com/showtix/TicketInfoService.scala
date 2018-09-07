@@ -100,6 +100,35 @@ trait TicketInfoService extends WebServiceCalls {
     } yield  events
   }
 
+  def getTicketInfo(ticketNr: String, location: Location): Future[TicketInfo] = {
+    val emptyTicketInfo = TicketInfo(ticketNr, location)
+    val eventInfo = getEvent(ticketNr, location).recover(withPrevious(emptyTicketInfo))
+
+    eventInfo.flatMap { info ⇒
+      val infoWithWeather = getWeather(info)
+
+      val infoWithTravelAdvice = info.event.map { event ⇒
+        getTravelAdvice(info, event)
+      }.getOrElse(eventInfo)
+
+      val suggestedEvents: Future[Seq[Event]] = info.event.map { event ⇒
+        getSuggestions(event)
+      }.getOrElse(Future.successful(Seq()))
+
+      val ticketInfos = Seq(infoWithTravelAdvice, infoWithWeather)
+
+      val infoWithTravelAdviceAndWeather: Future[TicketInfo] = Future.fold(ticketInfos)(info) { (acc, elem) ⇒
+        val (travelAdvice, weather) = (elem.travelAdvice, elem.weather)
+
+        acc.copy(travelAdvice = travelAdvice.orElse(acc.travelAdvice),
+          weather = weather.orElse(acc.weather))
+      }
+
+      for (info ← infoWithTravelAdviceAndWeather; suggestions ← suggestedEvents)
+        yield info.copy(suggestions = suggestions)
+    }
+  }
+
 }
 
 trait WebServiceCalls {
@@ -114,5 +143,7 @@ trait WebServiceCalls {
   def callArtistCalendarService(artist: Artist, nearLocation: Location): Future[Event]
 
   def callSimilarArtistService(event: Event): Future[Seq[Artist]]
+
+  def getEvent(ticketNr: String, location: Location): Future[TicketInfo]
 
 }
