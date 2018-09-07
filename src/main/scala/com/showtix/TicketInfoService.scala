@@ -10,13 +10,13 @@ trait TicketInfoService extends WebServiceCalls {
   type Recovery[T] = PartialFunction[Throwable, T]
 
 //  recover with None
-  def withNone[T]:Recovery[Option[T]] = { case NonFatal(e) ⇒ None }
+  def withNone[T]:Recovery[Option[T]] = { case NonFatal(_) ⇒ None }
 
 //  recovery with empty sequence
-  def withEmptySeq[T]:Recovery[Seq[T]] = { case NonFatal(e) ⇒ Seq() }
+  def withEmptySeq[T]:Recovery[Seq[T]] = { case NonFatal(_) ⇒ Seq() }
 
 //  recover with the previous info that was built in the previous step
-  def withPrevious(previousTicketInfo: TicketInfo): Recovery[TicketInfo] = { case NonFatal(e) ⇒ previousTicketInfo }
+  def withPrevious(previousTicketInfo: TicketInfo): Recovery[TicketInfo] = { case NonFatal(_) ⇒ previousTicketInfo }
 
   def getWeather(ticketInfo: TicketInfo): Future[TicketInfo] = {
     val futureWeatherX = callWeatherXService(ticketInfo).recover(withNone)
@@ -73,16 +73,22 @@ trait TicketInfoService extends WebServiceCalls {
     val futurePublicTransport = callPublicTransportService(ticketInfo.userLocation, event.location, event.time).recover(withNone)
 
     for {
-      (routeByCar, publicTransportAdvcie) ← futureRoute.zip(futurePublicTransport)
-      travelAdvice = TravelAdvice(routeByCar, publicTransportAdvcie)
+      (routeByCar, publicTransportAdvice) ← futureRoute.zip(futurePublicTransport)
+      travelAdvice = TravelAdvice(routeByCar, publicTransportAdvice)
     } yield ticketInfo.copy(travelAdvice = Some(travelAdvice))
   }
 
-  def getPlannedEvents(event: Event, artists: Seq[Artist]): Future[Seq[Event]]= {
+  def getPlannedEvents(event: Event, artists: Seq[Artist]): Future[Seq[Event]] = {
     val events = artists.map { artist ⇒
       callArtistCalendarService(artist, event.location)
     }
     Future.sequence(events)
+  }
+
+  def getPlannedEventsWithTraverse(event: Event, artists: Seq[Artist]): Future[Seq[Event]] = {
+    Future.traverse(artists) { artist ⇒
+      callArtistCalendarService(artist, event.location)
+    }
   }
 
 }
