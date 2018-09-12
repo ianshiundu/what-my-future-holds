@@ -17,4 +17,8 @@ trait mockWebServiceCalls extends WebServiceCalls {
       } else throw new Exception("oh! crap")
     }
   }
+
+  def callWeatherXService(ticketInfo: TicketInfo): Future[Option[Weather]] = {
+    Future { Some(Weather(30, precipitation = false))}
+  }
 }
