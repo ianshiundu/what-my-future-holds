@@ -1,5 +1,5 @@
 package com.showtix
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, Duration}
 
 import scala.concurrent.Future
 
@@ -24,5 +24,12 @@ trait mockWebServiceCalls extends WebServiceCalls {
 
   def callWeatherYService(ticketInfo: TicketInfo): Future[Option[Weather]] = {
     Future { Some(Weather(30, precipitation = false))}
+  }
+
+  def callTrafficService(origin: Location, destination: Location, time: DateTime): Future[Option[RouteByCar]] = {
+    Future {
+      Some(RouteByCar("route1", DateTime.now().minusMinutes(35), origin, destination,
+        new Duration(30L), new Duration(20L)))
+    }
   }
 }
