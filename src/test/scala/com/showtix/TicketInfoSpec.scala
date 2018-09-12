@@ -21,4 +21,8 @@ trait mockWebServiceCalls extends WebServiceCalls {
   def callWeatherXService(ticketInfo: TicketInfo): Future[Option[Weather]] = {
     Future { Some(Weather(30, precipitation = false))}
   }
+
+  def callWeatherYService(ticketInfo: TicketInfo): Future[Option[Weather]] = {
+    Future { Some(Weather(30, precipitation = false))}
+  }
 }
