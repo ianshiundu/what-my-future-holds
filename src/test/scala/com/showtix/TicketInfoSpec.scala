@@ -46,4 +46,10 @@ trait mockWebServiceCalls extends WebServiceCalls {
         Artist("Flying Lotus", "fly.lo/calendar"))
     }
   }
+
+  def callArtistCalendarService(artist: Artist, nearLocation: Location): Future[Event] = {
+    Future {
+      Event(artist.name, Location(1d, 1d), DateTime.now())
+    }
+  }
 }
