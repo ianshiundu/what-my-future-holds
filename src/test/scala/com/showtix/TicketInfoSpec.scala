@@ -1,13 +1,27 @@
 package com.showtix
 import org.joda.time.{DateTime, Duration}
+import org.scalatest.{MustMatchers, WordSpec}
 
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration._
 
-class TicketInfoSpec {
+class TicketInfoSpec extends WordSpec with MustMatchers {
+  object TicketInfoService extends TicketInfoService with MockWebServiceCalls {
+    "getTicketInfo" must {
+      "return a complete ticket info when all futures are successful" in {
+        val ticketInfo = Await.result(getTicketInfo("254", Location(1d, 2d)), 300.millis)
+
+        ticketInfo.event.isEmpty must be(false)
+        ticketInfo.event.foreach(event ⇒ event.name must be("Coachella"))
+        ticketInfo.travelAdvice.isEmpty must be(false)
+        ticketInfo.suggestions.map(_.name) must be(Seq("Fvzzkill", "MadLib", "Flying Lotus"))
+      }
+    }
+  }
 
 }
 
-trait mockWebServiceCalls extends WebServiceCalls {
+trait MockWebServiceCalls extends WebServiceCalls {
   import scala.concurrent.ExecutionContext.Implicits.global
 
   def getEvent(ticketNr: String, location: Location): Future[TicketInfo] = {
@@ -36,7 +50,7 @@ trait mockWebServiceCalls extends WebServiceCalls {
   def callPublicTransportService(origin: Location, destination: Location, time: DateTime): Future[Option[PublicTransportAdvice]] = {
     Future {
       Some(PublicTransportAdvice("public transport route 1", DateTime.now().minusMinutes(20), origin, destination,
-        new Duration(20L) ))
+        new Duration(20L)))
     }
   }
 
