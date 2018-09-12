@@ -32,4 +32,11 @@ trait mockWebServiceCalls extends WebServiceCalls {
         new Duration(30L), new Duration(20L)))
     }
   }
+
+  def callPublicTransportService(origin: Location, destination: Location, time: DateTime): Future[Option[PublicTransportAdvice]] = {
+    Future {
+      Some(PublicTransportAdvice("public transport route 1", DateTime.now().minusMinutes(20), origin, destination,
+        new Duration(20L) ))
+    }
+  }
 }
