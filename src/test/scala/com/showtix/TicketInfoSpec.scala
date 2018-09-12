@@ -17,6 +17,12 @@ class TicketInfoSpec extends WordSpec with MustMatchers {
         ticketInfo.suggestions.map(_.name) must be(Seq("Fvzzkill", "MadLib", "Flying Lotus"))
       }
     }
+    "return an incomplete ticket info when getEvent fails" in {
+      val ticketInfo = Await.result(getTicketInfo("1234", Location(1d, 2d)), 300.millis)
+      ticketInfo.event.isEmpty must be(true)
+      ticketInfo.travelAdvice.isEmpty must be(true)
+      ticketInfo.suggestions.isEmpty must be(true)
+    }
   }
 
 }
