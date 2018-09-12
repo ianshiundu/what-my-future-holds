@@ -39,4 +39,11 @@ trait mockWebServiceCalls extends WebServiceCalls {
         new Duration(20L) ))
     }
   }
+
+  def callSimilarArtistService(event: Event): Future[Seq[Artist]] = {
+    Future {
+      Seq(Artist("Fvzzkill", "iamfuzzkill.com/calendar"), Artist("MadLib", "madlib.com/calendar"),
+        Artist("Flying Lotus", "fly.lo/calendar"))
+    }
+  }
 }
